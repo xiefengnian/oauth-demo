@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <script>
+    const auth = () => {
+      const clientId = 'myClientId';
+      const redirectUri = window.location.origin;
+      const responseType = 'code';
+      const state = 'myState';
+      const url = `http://localhost:3030/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&state=${state}`;
+      window.location.href = url;
+    };
+
+    const deauth = () => {
+      const url = `http://localhost:3030/revoke?client_id=myClientId&redirect_uri=${window.location.origin}`;
+      window.open(url);
+    };
+  </script>
+  <body>
+    <div>auth token: <span id="token"></span></div>
+    <h1>Resource</h1>
+    <div>
+      <img id="img" src="" />
+    </div>
+    <div>
+      <ul>
+        <li>client id: myClientId</li>
+        <li>redirect uri: <span id="my_uri"></span></li>
+        <li>response_type: code</li>
+        <li>grant_type: authorization_code</li>
+        <li>state: myState</li>
+      </ul>
+    </div>
+    <button onclick="auth()">auth</button>
+    <button onclick="deauth()">deauth</button>
+  </body>
+  <script>
+    const u = new URL(window.location.href);
+    document.querySelector('#token').innerHTML = u.searchParams.get('token');
+    document.querySelector('#my_uri').innerHTML = window.location.origin;
+
+    document
+      .querySelector('#img')
+      .setAttribute(
+        'src',
+        `http://localhost:3040/resource/1.png?authorization_code=${u.searchParams.get(
+          'token'
+        )}&client_id=myClientId`
+      );
+  </script>
+</html>

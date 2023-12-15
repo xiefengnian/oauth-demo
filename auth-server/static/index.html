@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form id="form" method="post">
+      <h1>Login</h1>
+      <div>
+        <input name="username" />
+      </div>
+      <div>
+        <input name="password" />
+      </div>
+      <button type="submit">login</button>
+    </form>
+    <div>
+      <h2>client querys:</h2>
+      <ul>
+        <li>client id: <span id="client_id"></span></li>
+        <li>redirect uri: <span id="redirect_uri"></span></li>
+        <li>response_type: <span id="response_type"></span></li>
+        <li>grant_type: <span id="grant_type"></span></li>
+        <li>state: <span id="state"></span></li>
+      </ul>
+    </div>
+  </body>
+  <script>
+    const u = new URL(window.location.href);
+    const clientId = u.searchParams.get('client_id');
+    const redirectUri = u.searchParams.get('redirect_uri');
+    const responseType = u.searchParams.get('response_type');
+    const grantType = u.searchParams.get('grant_type');
+    const state = u.searchParams.get('state');
+    document.getElementById('client_id').innerText = clientId;
+    document.getElementById('redirect_uri').innerText = redirectUri;
+    document.getElementById('response_type').innerText = responseType;
+    document.getElementById('grant_type').innerText = grantType;
+    document.getElementById('state').innerText = state;
+
+    const login = (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const url = `http://localhost:3030/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&grant_type=${grantType}&state=${state}`;
+      const xhr = new XMLHttpRequest();
+
+      xhr.open('POST', url);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = () => {
+        if (xhr.status === 200 && xhr.readyState === 4) {
+          const data = JSON.parse(xhr.responseText);
+          window.location.href = `${data.redirect_uri}?token=${data.authorization_code}`;
+        }
+      };
+      xhr.send(
+        JSON.stringify({
+          username: formData.get('username'),
+          password: formData.get('password'),
+        })
+      );
+    };
+    document.querySelector('#form').addEventListener('submit', login);
+  </script>
+</html>
